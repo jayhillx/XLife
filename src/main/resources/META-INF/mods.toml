@@ -1,0 +1,19 @@
+modLoader="javafml"
+
+loaderVersion="[36,)"
+
+license="All rights reserved"
+
+[[mods]]
+
+modId="xlife"
+
+version="1.16.5-1.0"
+
+displayName="X Life"
+
+authors="jay hill"
+
+description='''
+Inspired by the X Life YouTube SMP!
+'''
