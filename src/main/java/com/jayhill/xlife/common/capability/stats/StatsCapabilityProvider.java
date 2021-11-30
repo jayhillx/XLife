@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class StatsCapabilityProvider implements ICapabilitySerializable<CompoundNBT> {
-    public static final DefaultStatsCapability stats = new DefaultStatsCapability();
+    private final DefaultStatsCapability stats = new DefaultStatsCapability();
     final LazyOptional<IStatsCapability> statsOptional = LazyOptional.of(() -> stats);
 
     @Nonnull

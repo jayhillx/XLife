@@ -11,32 +11,36 @@ import java.util.Arrays;
 
 public class StatsCapability {
     @CapabilityInject(IStatsCapability.class)
-    public static Capability<IStatsCapability> STATS_CAPABILITY = null;
+    public static Capability<IStatsCapability> STATS_CAPABILITY;
 
-    /** Register Capability. */
     public static void registerCapability() {
         CapabilityManager.INSTANCE.register(IStatsCapability.class, new Storage(), DefaultStatsCapability::new);
     }
 
-    public static class Storage implements Capability.IStorage<IStatsCapability> {
-
-        public INBT writeNBT(Capability<IStatsCapability> capability, IStatsCapability instance, Direction side) {
+    private static class Storage implements Capability.IStorage<IStatsCapability> {
+        public INBT writeNBT(Capability<IStatsCapability> capability, IStatsCapability stats, Direction side) {
             CompoundNBT tag = new CompoundNBT();
-            if (instance.getCause() != null) {
-                tag.putString("time", Arrays.toString(instance.getTime()).replace("]", "").replace("[", ""));
-                tag.putString("cause", Arrays.toString(instance.getCause()).replace("]", "").replace("[", ""));
-            }
+            tag.putString("cause", Arrays.toString(stats.getCause()).replace("]", "").replace("[", ""));
+            tag.putString("message", Arrays.toString(stats.getMessage()).replace("]", "").replace("[", ""));
+            tag.putString("time", Arrays.toString(stats.getTime()).replace("]", "").replace("[", ""));
+
             return tag;
         }
 
-        public void readNBT(Capability<IStatsCapability> capability, IStatsCapability instance, Direction side, INBT nbt) {
-            String time = ((CompoundNBT)nbt).getString("time");
-            String[] timeArray = time.split(", ");
-            instance.setTime(timeArray);
-
-            String cause = ((CompoundNBT)nbt).getString("cause");
-            String[] causeArray = cause.split(", ");
-            instance.setCause(causeArray);
+        public void readNBT(Capability<IStatsCapability> capability, IStatsCapability stats, Direction side, INBT nbt) {
+            CompoundNBT tag = (CompoundNBT) nbt;
+            if (tag.contains("cause")) {
+                String[] causeArray = tag.getString("cause").split(", ");
+                stats.setCause(causeArray);
+            }
+            if (tag.contains("message")) {
+                String[] messageArray = tag.getString("message").split(", ");
+                stats.setMessage(messageArray);
+            }
+            if (tag.contains("time")) {
+                String[] timeArray = tag.getString("time").split(", ");
+                stats.setTime(timeArray);
+            }
         }
     }
 

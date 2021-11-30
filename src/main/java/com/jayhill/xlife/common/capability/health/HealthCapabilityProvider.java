@@ -10,7 +10,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class HealthCapabilityProvider implements ICapabilitySerializable<CompoundNBT> {
-    public static final DefaultHealthCapability health = new DefaultHealthCapability();
+    private final DefaultHealthCapability health = new DefaultHealthCapability();
     final LazyOptional<IHealthCapability> healthOptional = LazyOptional.of(() -> health);
 
     @Nonnull

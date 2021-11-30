@@ -18,8 +18,10 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @SuppressWarnings("all")
 public class StatsEvents {
 
+    private String cause;
+
     @SubscribeEvent
-    public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
+    public void onAttach(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof PlayerEntity) {
             StatsCapabilityProvider provider = new StatsCapabilityProvider();
             event.addCapability(new ResourceLocation(XLife.MOD_ID, "stats"), provider);
@@ -27,33 +29,15 @@ public class StatsEvents {
     }
 
     @SubscribeEvent
-    public void cloneCapability(PlayerEvent.Clone event) {
-        LazyOptional<IStatsCapability> capability = event.getOriginal().getCapability(StatsCapability.STATS_CAPABILITY);
-
-        capability.ifPresent((oldStore) -> event.getPlayer().getCapability(StatsCapability.STATS_CAPABILITY).ifPresent((newStore) -> newStore.onDeath((DefaultStatsCapability) oldStore)));
-    }
-
-    @SubscribeEvent
     public void onDeath(LivingDeathEvent event) {
-        LivingEntity entity = event.getEntityLiving();
-        Entity causeEntity = event.getSource().getEntity();
         DamageSource source = event.getSource();
+        Entity sourceEntity = event.getSource().getTrueSource();
 
-        /** Sets Cause. */
-        String cause = null;
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity)entity;
+        if (event.getEntity() instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) event.getEntity();
 
-            if (causeEntity instanceof LivingEntity) {
-                if (causeEntity instanceof PlayerEntity) {
-                    if (causeEntity == player) {
-                        cause = "Yourself";
-                    } else {
-                        cause = ((PlayerEntity)causeEntity).getName().getString();
-                    }
-                } else {
-                    cause = ((LivingEntity)causeEntity).getName().getString();
-                }
+            if (sourceEntity instanceof LivingEntity) {
+                cause = sourceEntity.getName().getString();
             } else {
                 if (source == DamageSource.IN_FIRE) {
                     cause = "Flames";
@@ -100,42 +84,50 @@ public class StatsEvents {
                 }
             }
 
-            String finalCause = cause;
             player.getCapability(HealthCapability.HEALTH_CAPABILITY).ifPresent(health -> {
                 player.getCapability(StatsCapability.STATS_CAPABILITY).ifPresent(stats -> {
-                    int hearts = (int) (health.getMaxHealth() - 2) / 2;
-
-                    if (hearts >= 1 && hearts <= 10) {
-                        String[] causeArray = stats.getCause();
-                        causeArray[hearts - 1] = finalCause;
-                        stats.setCause(causeArray);
-                    }
-
                     player.getCapability(TimeCapability.TIME_CAPABILITY).ifPresent(time -> {
+                        int hearts = (int) ((health.getMaxHealth() - 2) / 2);
+
                         if (hearts >= 1 && hearts <= 10) {
+                            String[] causeArray = stats.getCause();
+                            causeArray[hearts - 1] = cause;
+                            stats.setCause(causeArray);
+
+                            String[] messageArray = stats.getMessage();
+                            messageArray[hearts - 1] = player.getCombatTracker().getDeathMessage().getString();
+                            stats.setMessage(messageArray);
+
                             String[] timeArray = stats.getTime();
 
-                            if (time.getTime() == 1) {
+                            if (time.getStoredTime() == 1) {
                                 timeArray[hearts - 1] = "1 second";
-                            } else if (time.getTime() < 60) {
-                                timeArray[hearts - 1] = time.getTime() + " seconds";
-                            } else if (time.getTime() >= 60 && time.getTime() < 120) {
+                            } else if (time.getStoredTime() < 60) {
+                                timeArray[hearts - 1] = time.getStoredTime() + " seconds";
+                            } else if (time.getStoredTime() >= 60 && time.getStoredTime() < 120) {
                                 timeArray[hearts - 1] = "1 minute";
-                            } else if (time.getTime() >= 120 && time.getTime() < 3600) {
-                                timeArray[hearts - 1] = time.getTime() / 60 + " minutes";
-                            } else if (time.getTime() >= 3600 && time.getTime() < 7200) {
+                            } else if (time.getStoredTime() >= 120 && time.getStoredTime() < 3600) {
+                                timeArray[hearts - 1] = time.getStoredTime() / 60 + " minutes";
+                            } else if (time.getStoredTime() >= 3600 && time.getStoredTime() < 7200) {
                                 timeArray[hearts - 1] = "1 hour";
                             } else {
-                                timeArray[hearts - 1] = time.getTime() / 3600 + " hours";
+                                timeArray[hearts - 1] = time.getStoredTime() / 3600 + " hours";
                             }
 
                             stats.setTime(timeArray);
-                            time.setTime(0);
+                            time.setStoredTime(0);
                         }
                     });
                 });
             });
         }
     }
-    
+
+    @SubscribeEvent
+    public void onClone(PlayerEvent.Clone event) {
+        LazyOptional<IStatsCapability> capability = event.getOriginal().getCapability(StatsCapability.STATS_CAPABILITY);
+
+        capability.ifPresent(oldStore -> event.getPlayer().getCapability(StatsCapability.STATS_CAPABILITY).ifPresent(newStore -> newStore.onClone((DefaultStatsCapability) oldStore)));
+    }
+
 }

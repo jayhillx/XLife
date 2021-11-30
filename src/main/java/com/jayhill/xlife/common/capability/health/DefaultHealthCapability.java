@@ -2,19 +2,19 @@ package com.jayhill.xlife.common.capability.health;
 
 public class DefaultHealthCapability implements IHealthCapability {
 
-    /** Players stored max health. */
+    /** Stores a number to set players max health. */
     private float maxHealth = 0;
+
+    public float getMaxHealth() {
+        return this.maxHealth;
+    }
 
     public void setMaxHealth(float health) {
         this.maxHealth = health;
     }
 
-    public float getMaxHealth() {
-        return maxHealth;
-    }
-
-    public void onDeath(IHealthCapability respawn) {
-        this.maxHealth = respawn.getMaxHealth();
+    public void onClone(DefaultHealthCapability clone) {
+        this.maxHealth = clone.getMaxHealth();
     }
     
 }

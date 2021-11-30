@@ -9,24 +9,25 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 
 public class TimeCapability {
     @CapabilityInject(ITimeCapability.class)
-    public static Capability<ITimeCapability> TIME_CAPABILITY = null;
+    public static Capability<ITimeCapability> TIME_CAPABILITY;
 
-    /** Register Capability. */
     public static void registerCapability() {
         CapabilityManager.INSTANCE.register(ITimeCapability.class, new Storage(), DefaultTimeCapability::new);
     }
 
-    public static class Storage implements Capability.IStorage<ITimeCapability> {
-
-        public INBT writeNBT(Capability<ITimeCapability> capability, ITimeCapability instance, Direction side) {
+    private static class Storage implements Capability.IStorage<ITimeCapability> {
+        public INBT writeNBT(Capability<ITimeCapability> capability, ITimeCapability time, Direction side) {
             CompoundNBT tag = new CompoundNBT();
-            tag.putInt("time", instance.getTime());
+            tag.putInt("time", time.getStoredTime());
+
             return tag;
         }
 
-        public void readNBT(Capability<ITimeCapability> capability, ITimeCapability instance, Direction side, INBT nbt) {
-            int time = ((CompoundNBT)nbt).getInt("time");
-            instance.setTime(time);
+        public void readNBT(Capability<ITimeCapability> capability, ITimeCapability time, Direction side, INBT nbt) {
+            CompoundNBT tag = (CompoundNBT) nbt;
+            if (tag.contains("time")) {
+                time.setStoredTime(tag.getInt("time"));
+            }
         }
     }
 

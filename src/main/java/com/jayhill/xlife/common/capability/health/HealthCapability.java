@@ -9,26 +9,24 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 
 public class HealthCapability {
     @CapabilityInject(IHealthCapability.class)
-    public static Capability<IHealthCapability> HEALTH_CAPABILITY = null;
+    public static Capability<IHealthCapability> HEALTH_CAPABILITY;
 
-    /** Register Capability. */
     public static void registerCapability() {
         CapabilityManager.INSTANCE.register(IHealthCapability.class, new Storage(), DefaultHealthCapability::new);
     }
 
-    public static class Storage implements Capability.IStorage<IHealthCapability> {
-
-        public INBT writeNBT(Capability<IHealthCapability> capability, IHealthCapability instance, Direction side) {
+    private static class Storage implements Capability.IStorage<IHealthCapability> {
+        public INBT writeNBT(Capability<IHealthCapability> capability, IHealthCapability health, Direction side) {
             CompoundNBT tag = new CompoundNBT();
-            tag.putFloat("health", instance.getMaxHealth());
+            tag.putFloat("health", health.getMaxHealth());
 
             return tag;
         }
 
-        public void readNBT(Capability<IHealthCapability> capability, IHealthCapability instance, Direction side, INBT nbt) {
+        public void readNBT(Capability<IHealthCapability> capability, IHealthCapability health, Direction side, INBT nbt) {
             CompoundNBT tag = (CompoundNBT) nbt;
             if (tag.contains("health")) {
-                instance.setMaxHealth(tag.getFloat("health"));
+                health.setMaxHealth(tag.getFloat("health"));
             }
         }
     }

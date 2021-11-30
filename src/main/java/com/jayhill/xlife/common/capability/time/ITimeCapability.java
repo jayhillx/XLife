@@ -2,10 +2,10 @@ package com.jayhill.xlife.common.capability.time;
 
 public interface ITimeCapability {
 
-    void setTime(int time);
+    int getStoredTime();
 
-    int getTime();
+    void setStoredTime(int time);
 
-    void onDeath(DefaultTimeCapability respawn);
+    void onClone(DefaultTimeCapability respawn);
 
 }

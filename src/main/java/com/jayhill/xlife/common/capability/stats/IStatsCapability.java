@@ -2,14 +2,18 @@ package com.jayhill.xlife.common.capability.stats;
 
 public interface IStatsCapability {
 
-    void setCause(String[] cause);
-
-    void setTime(String[] time);
-
     String[] getCause();
+
+    String[] getMessage();
 
     String[] getTime();
 
-    void onDeath(DefaultStatsCapability respawn);
+    void setCause(String[] cause);
+
+    void setMessage(String[] message);
+
+    void setTime(String[] time);
+
+    void onClone(DefaultStatsCapability respawn);
 
 }

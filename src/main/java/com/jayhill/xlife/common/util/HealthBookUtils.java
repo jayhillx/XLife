@@ -1,5 +1,7 @@
 package com.jayhill.xlife.common.util;
 
+import com.jayhill.xlife.common.capability.health.HealthCapability;
+import com.jayhill.xlife.common.capability.health.IHealthCapability;
 import com.jayhill.xlife.common.capability.stats.IStatsCapability;
 import com.jayhill.xlife.common.capability.stats.StatsCapability;
 import com.jayhill.xlife.common.capability.time.ITimeCapability;
@@ -19,44 +21,47 @@ public class HealthBookUtils {
     /** Gets the pages written in the book. */
     private static String getPages(PlayerEntity player, int pages) {
         IStatsCapability stats = player.getCapability(StatsCapability.STATS_CAPABILITY).orElse(null);
+        IHealthCapability health = player.getCapability(HealthCapability.HEALTH_CAPABILITY).orElse(null);
+
         String[] time = stats.getTime();
         String[] cause = stats.getCause();
+        String[] message = stats.getMessage();
 
         if (pages == 1) {
-            if (player.getMaxHealth() == 2.0F) {
+            if (health.getMaxHealth() == 2.0F) {
                 return (living(player, 1));
-            } else if (player.getMaxHealth() == 4.0F) {
-                return lasted(1, time[0], cause[0]) + "," + living(player, 2);
-            } else if (player.getMaxHealth() == 6.0F) {
-                return lasted(1, time[0], cause[0]) + "," + lasted(2, time[1], cause[1]) + "," + living(player, 3);
+            } else if (health.getMaxHealth() == 4.0F) {
+                return lasted(1, time[0], message[0], cause[0]) + "," + living(player, 2);
+            } else if (health.getMaxHealth() == 6.0F) {
+                return lasted(1, time[0], message[0], cause[0]) + "," + lasted(2, time[1], message[1], cause[1]) + "," + living(player, 3);
             } else {
-                return lasted(1, time[0], cause[0]) + "," + lasted(2, time[1], cause[1]) + "," + lasted(3, time[2], cause[2]);
+                return lasted(1, time[0], message[0], cause[0]) + "," + lasted(2, time[1], message[1], cause[1]) + "," + lasted(3, time[2], message[2], cause[2]);
             }
         } else if (pages == 2) {
-            if (player.getMaxHealth() == 8.0F) {
+            if (health.getMaxHealth() == 8.0F) {
                 return (living(player, 4));
-            } else if (player.getMaxHealth() == 10.0F) {
-                return lasted(4, time[3], cause[3]) + "," + living(player, 5);
-            } else if (player.getMaxHealth() == 12.0F) {
-                return lasted(4, time[3], cause[3]) + "," + lasted(5, time[4], cause[4]) + "," + living(player, 6);
+            } else if (health.getMaxHealth() == 10.0F) {
+                return lasted(4, time[3], message[3], cause[3]) + "," + living(player, 5);
+            } else if (health.getMaxHealth() == 12.0F) {
+                return lasted(4, time[3], message[3], cause[3]) + "," + lasted(5, time[4], message[4], cause[4]) + "," + living(player, 6);
             } else {
-                return lasted(4, time[3], cause[3]) + "," + lasted(5, time[4], cause[4]) + "," + lasted(6, time[5], cause[5]);
+                return lasted(4, time[3], message[3], cause[3]) + "," + lasted(5, time[4], message[4], cause[4]) + "," + lasted(6, time[5], message[5], cause[5]);
             }
         } else if (pages == 3) {
-            if (player.getMaxHealth() == 14.0F) {
+            if (health.getMaxHealth() == 14.0F) {
                 return (living(player, 7));
-            } else if (player.getMaxHealth() == 16.0F) {
-                return lasted(7, time[6], cause[6]) + "," + living(player, 8);
-            } else if (player.getMaxHealth() == 18.0F) {
-                return lasted(7, time[6], cause[6]) + "," + lasted(8, time[7], cause[7]) + "," + living(player, 9);
+            } else if (health.getMaxHealth() == 16.0F) {
+                return lasted(7, time[6], message[6], cause[6]) + "," + living(player, 8);
+            } else if (health.getMaxHealth() == 18.0F) {
+                return lasted(7, time[6], message[6], cause[6]) + "," + lasted(8, time[7], message[7], cause[7]) + "," + living(player, 9);
             } else {
-                return lasted(7, time[6], cause[6]) + "," + lasted(8, time[7], cause[7]) + "," + lasted(9, time[8], cause[8]);
+                return lasted(7, time[6], message[6], cause[6]) + "," + lasted(8, time[7], message[7], cause[7]) + "," + lasted(9, time[8], message[8], cause[8]);
             }
         } else if (pages == 4) {
-            if (player.getMaxHealth() == 20.0F) {
+            if (health.getMaxHealth() == 20.0F) {
                 return (living(player, 10));
             } else {
-                return lasted(10, time[9], cause[9]);
+                return lasted(10, time[9], message[9], cause[9]);
             }
         } else {
             return null;
@@ -71,26 +76,26 @@ public class HealthBookUtils {
         return hearts(hearts) + ",{\"text\":\"\\n\"},{\"color\":\"black\",\"text\":\"" + time(player) + "\"}";
     }
 
-    private static String lasted(int hearts, String timeArray, String causeArray) {
-        return hearts(hearts) + ",{\"text\":\"\\n\"},{\"color\":\"black\",\"text\":\"Lasted " + timeArray + "\\nEnded by \"},{\"color\":\"dark_red\",\"text\":\"" + causeArray + "\"},{\"text\":\"\\n\\n\"}";
+    private static String lasted(int hearts, String timeArray, String messageArray, String causeArray) {
+        return hearts(hearts) + ",{\"text\":\"\\n\"},{\"color\":\"black\",\"text\":\"Lasted " + timeArray + "\\nEnded by \"},{\"color\":\"dark_red\",\"hoverEvent\":{\"action\":\"show_text\",\"value\":{\"text\":\"" + messageArray + "\"}},\"text\":\"" + causeArray + "\"},{\"text\":\"\\n\\n\"}";
     }
 
     /** Returns how long the player has been living. */
     private static String time(PlayerEntity player) {
         ITimeCapability time = player.getCapability(TimeCapability.TIME_CAPABILITY).orElse(null);
 
-        if (time.getTime() == 1) {
+        if (time.getStoredTime() == 1) {
             return "Living 1 second";
-        } else if (time.getTime() < 60) {
-            return "Living " + time.getTime() + " seconds";
-        } else if (time.getTime() >= 60 && time.getTime() < 120) {
+        } else if (time.getStoredTime() < 60) {
+            return "Living " + time.getStoredTime() + " seconds";
+        } else if (time.getStoredTime() >= 60 && time.getStoredTime() < 120) {
             return "Living 1 minute";
-        } else if (time.getTime() >= 120 && time.getTime() < 3600) {
-            return "Living " + time.getTime() / 60 + " minutes";
-        } else if (time.getTime() >= 3600 && time.getTime() < 7200) {
+        } else if (time.getStoredTime() >= 120 && time.getStoredTime() < 3600) {
+            return "Living " + time.getStoredTime() / 60 + " minutes";
+        } else if (time.getStoredTime() >= 3600 && time.getStoredTime() < 7200) {
             return "Living 1 hour";
         } else {
-            return "Living " + time.getTime() / 3600 + " hours";
+            return "Living " + time.getStoredTime() / 3600 + " hours";
         }
     }
 
