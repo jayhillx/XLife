@@ -11,15 +11,14 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.16.5-1.0'
-group = 'com.jayhill.xlife'
-archivesBaseName = 'xlife'
+version = '1.16.5-3.1.0'
+group = 'com.xlife'
+archivesBaseName = 'XLife'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-
     mappings channel: 'official', version: '1.16.5'
 
     runs {
@@ -27,31 +26,6 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-
-            mods {
-                xlife {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                xlife {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'xlife', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 xlife {
@@ -67,13 +41,13 @@ sourceSets.main.resources {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.0'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.2.20'
 }
 
 jar {
     manifest {
         attributes([
-            "Specification-Title": "examplemod",
+            "Specification-Title": "xlife",
             "Specification-Vendor": "examplemodsareus",
             "Specification-Version": "1",
             "Implementation-Title": project.name,
