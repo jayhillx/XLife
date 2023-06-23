@@ -35,6 +35,10 @@ minecraft {
     }
 }
 
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+}
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.14.4-28.2.0'
 }
