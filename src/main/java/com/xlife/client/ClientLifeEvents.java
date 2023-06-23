@@ -67,14 +67,5 @@ public class ClientLifeEvents {
         newPlayer.getAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(oldPlayer.getMaxHealth());
         newPlayer.setHealth(oldPlayer.getMaxHealth());
     }
-
-    @SubscribeEvent
-    public static void test(ClientPlayerNetworkEvent.RespawnEvent event) {
-        if (event.getPlayer() != null) {
-            NetworkPlayerInfo info = new NetworkPlayerInfo(event.getPlayer().getGameProfile());
-
-            info.setDisplayName(new StringTextComponent(" ()"));
-        }
-    }
-
+    
 }
