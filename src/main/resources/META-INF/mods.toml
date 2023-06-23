@@ -1,19 +1,19 @@
 modLoader="javafml"
 
-loaderVersion="[36,)"
-
-license="All rights reserved"
+loaderVersion="[28,)"
 
 [[mods]]
 
 modId="xlife"
 
-version="1.16.5-1.0"
+version="1.14.2-1.0"
 
 displayName="X Life"
 
-authors="jay hill"
+credits="pau101"
+
+authors="jay❤"
 
 description='''
-Inspired by the X Life YouTube SMP!
+Start with one heart and ten lives, everytime you die, you gain one heart and lose a life.
 '''
