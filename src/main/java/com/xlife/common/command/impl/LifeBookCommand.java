@@ -20,9 +20,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-
-import java.util.Collection;
-import java.util.Collections;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 public class LifeBookCommand {
 
@@ -32,48 +31,54 @@ public class LifeBookCommand {
         }).executes((context) -> {
             return getHistory(context.getSource());
         }).then(Commands.argument("player", SavedPlayerArgument.player()).executes((context) -> {
-            return getHistory(SavedPlayerArgument.getPlayer(context, "player"), context.getSource().asPlayer());
+            return getHistory(context.getSource(), context.getArgument("player", String.class), context.getSource().asPlayer());
         })).then(Commands.argument("player", SavedPlayerArgument.player()).then(Commands.argument("targets", EntityArgument.player()).executes((context) -> {
-            return getHistory(SavedPlayerArgument.getPlayer(context, "player"), EntityArgument.getPlayer(context, "targets"));
+            return getHistory(context.getSource(), context.getArgument("player", String.class), EntityArgument.getPlayer(context, "targets"));
         }))));
     }
 
     private static int getHistory(CommandSource source) throws CommandSyntaxException {
-        return getHistory(Collections.singleton(source.asPlayer().getGameProfile()), source.asPlayer());
+        return getHistory(source, source.asPlayer().getScoreboardName(), source.asPlayer());
     }
 
-    private static int getHistory(Collection<GameProfile> profiles, ServerPlayerEntity player) {
+    private static int getHistory(CommandSource source, String name, ServerPlayerEntity player) {
         Item item = Items.WRITTEN_BOOK;
 
         if (item != null) {
-            player.world.getCapability(WorldCapability.WORLD_DATA).ifPresent((world) -> {
-                for (GameProfile profile : profiles) {
-                    PlayerInformationData data = world.getInformationById(profile);
+            if (player.getServer() != null) {
+                player.world.getCapability(WorldCapability.WORLD_DATA).ifPresent((world) -> {
+                    GameProfile profile = player.getServer().getPlayerProfileCache().getGameProfileForUsername(name);
 
-                    CompoundNBT nbt = new CompoundNBT();
-                    nbt.putString("title", "Life History of " + data.getPlayer().getName());
-                    nbt.putString("author", "@secondchances");
-                    nbt.put("pages", new ListNBT());
-                    NBTUtil.writeGameProfile(nbt, data.getPlayer());
+                    if (world.getPlayers().containsKey(profile)) {
+                        PlayerInformationData data = world.getInformationById(profile);
 
-                    try {
-                        ItemStack stack = new ItemInput(item, nbt).createStack(1, false);
-                        boolean flag = player.inventory.addItemStackToInventory(stack);
+                        CompoundNBT nbt = new CompoundNBT();
+                        nbt.putString("title", "Life History of " + data.getPlayer().getName());
+                        nbt.putString("author", "@secondchances");
+                        nbt.put("pages", new ListNBT());
+                        NBTUtil.writeGameProfile(nbt, data.getPlayer());
 
-                        if (flag && stack.isEmpty()) {
-                            stack.setCount(1);
-                            ItemEntity itemEntity = player.dropItem(stack, false);
-                            if (itemEntity != null) {
-                                itemEntity.makeFakeItem();
+                        try {
+                            ItemStack stack = new ItemInput(item, nbt).createStack(1, false);
+                            boolean flag = player.inventory.addItemStackToInventory(stack);
+
+                            if (flag && stack.isEmpty()) {
+                                stack.setCount(1);
+                                ItemEntity itemEntity = player.dropItem(stack, false);
+                                if (itemEntity != null) {
+                                    itemEntity.makeFakeItem();
+                                }
+                                player.world.playSound(player, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRNG().nextFloat() - player.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
+                                player.container.detectAndSendChanges();
                             }
-                            player.world.playSound(player, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.2F, ((player.getRNG().nextFloat() - player.getRNG().nextFloat()) * 0.7F + 1.0F) * 2.0F);
-                            player.container.detectAndSendChanges();
+                        } catch (CommandSyntaxException e) {
+                            e.printStackTrace();
                         }
-                    } catch (CommandSyntaxException e) {
-                        e.printStackTrace();
+                    } else {
+                        source.sendFeedback(new StringTextComponent("That player does not exist").applyTextStyle(TextFormatting.RED), false);
                     }
-                }
-            });
+                });
+            }
         }
         return 1;
     }
